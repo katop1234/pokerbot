@@ -1,6 +1,7 @@
 from classes import Card, Hand, RankObject, Opponents
 import itertools, pickle, random
 
+
 def get_all_cards():
     raw_cards = list(itertools.product(Card.card_values, Card.suits))
     all_cards = []
@@ -8,6 +9,7 @@ def get_all_cards():
         card = list(card)
         all_cards.append(Card(card[0], card[1]))
     return all_cards
+
 
 def get_all_hands():
     hands = []
@@ -21,6 +23,7 @@ def get_all_hands():
             hands.append(hand)
 
     return hands
+
 
 def get_remaining_cards(hand, cards_on_board):
     # remove cards in my hand
@@ -37,11 +40,14 @@ def get_remaining_cards(hand, cards_on_board):
 
     return valid_cards
 
+
 def get_simulated_opponents_hands(cards_sampled, num_opponents):
     return Opponents(cards_sampled, num_opponents)
 
+
 def get_simulated_cards_on_board(cards_sampled, num_cards_left_to_reveal):
     return cards_sampled[-num_cards_left_to_reveal:]
+
 
 def royal_flush_value(cards):
     values_per_suit = dict()
@@ -57,13 +63,16 @@ def royal_flush_value(cards):
 
     return RankObject(None, None)
 
+
 def isStraight(cards):
     assert len(cards) == 5
     cards_values = [card.value_for_sorting() for card in cards]
     cards_values.sort()
     return cards_values == list(range(min(cards_values), min(cards_values) + 5))
 
+
 top_card_map = pickle.load(open("serialized/top_card.map", "rb"))
+
 
 def get_top_card_value(cards):
     top_card_num_value = -float('inf')
@@ -76,10 +85,12 @@ def get_top_card_value(cards):
 
     return curr_top_card.value
 
+
 def isFlush(cards):
     assert len(cards) == 5
     cards_suits = [c.suit for c in cards]
     return all([suit == cards_suits[0] for suit in cards_suits])
+
 
 # todo test this function
 def straight_value(cards, check_if_straight_flush=False):
@@ -100,8 +111,11 @@ def straight_value(cards, check_if_straight_flush=False):
                     curr_top = top_card_map[top_card]
 
     return output
+
+
 def straight_flush_value(cards):
     return straight_value(cards, check_if_straight_flush=True)
+
 
 # todo test this function
 def four_of_a_kind_value(cards):
@@ -130,6 +144,7 @@ def four_of_a_kind_value(cards):
     if four_of_a_kind_found and top_card:
         output = RankObject("four_of_a_kind", top_card, best_5th_card)
     return output
+
 
 # todo test this function
 def full_house_value(cards):
@@ -166,6 +181,7 @@ def full_house_value(cards):
 
     return output
 
+
 def flush_value(cards):
     output = RankObject()
 
@@ -188,6 +204,7 @@ def flush_value(cards):
             break
 
     return output
+
 
 def three_of_a_kind_value(cards):
     # todo i copied this from the fullhouse function, there might be a better way of
@@ -225,6 +242,7 @@ def three_of_a_kind_value(cards):
         output = RankObject("three_of_a_kind", top_trips_value, kicker1, kicker2)
 
     return output
+
 
 def two_pair_value(cards):
     # todo i copied this from the fullhouse function, there might be a better way of
@@ -270,6 +288,7 @@ def two_pair_value(cards):
 
     return output
 
+
 def pair_value(cards):
     # todo i copied this from the three_of_a_kind code, try to abstract it better!!
     output = RankObject()
@@ -313,6 +332,7 @@ def pair_value(cards):
 
     return output
 
+
 def high_card_value(cards):
     high_card_value = get_top_card_value(cards)
 
@@ -347,6 +367,7 @@ def high_card_value(cards):
 
     return RankObject("high_card", high_card_value, kicker1, kicker2, kicker3, kicker4)
 
+
 def get_hand_ranking(hand, board):
     cards_from_hand = [hand.card1, hand.card2]
     seven_cards = cards_from_hand + board
@@ -376,16 +397,18 @@ def get_hand_ranking(hand, board):
     else:
         return high_card_value(seven_cards)
 
+
 def my_hand_is_better(my_hand, opp_hand, board):
     my_hand_ranking = get_hand_ranking(my_hand, board)
     opp_hand_ranking = get_hand_ranking(opp_hand, board)
 
-    if my_hand_ranking >= opp_hand_ranking: # ties are counted as wins
+    if my_hand_ranking >= opp_hand_ranking:  # ties are counted as wins
         return True
     else:
         return False
 
-def monte_carlo_winning_chance_estimator(hand, num_opponents, cards_on_board, iterations=1000):
+
+def monte_carlo_winning_chance_estimator(hand, num_opponents, cards_on_board, iterations=1000, verbose=False):
     assert type(hand) is Hand
     assert num_opponents >= 1 and num_opponents <= 10
     assert len(cards_on_board) <= 5
@@ -403,8 +426,9 @@ def monte_carlo_winning_chance_estimator(hand, num_opponents, cards_on_board, it
         simulated_opps = get_simulated_opponents_hands(cards_sampled, num_opponents)
         simulated_remaining_cards_on_board = get_simulated_cards_on_board(cards_sampled, num_cards_left_to_reveal)
 
-        print("OPPS", simulated_opps)
-        print("REMAINING CARDS ON BOARD", simulated_remaining_cards_on_board)
+        if verbose:
+            print("OPPS", simulated_opps)
+            print("REMAINING CARDS ON BOARD", simulated_remaining_cards_on_board)
 
         board = cards_on_board + simulated_remaining_cards_on_board
 
@@ -412,9 +436,14 @@ def monte_carlo_winning_chance_estimator(hand, num_opponents, cards_on_board, it
         for opponent_num in simulated_opps.opp_hands:
             opp_hand = simulated_opps.opp_hands[opponent_num]
             if not my_hand_is_better(hand, opp_hand, board):
-                print("lost")
                 win = 0
                 break
+
+        if verbose:
+            if win == 1:
+                print("won")
+            elif win == 0:
+                print("lost")
 
         wins += win
 
