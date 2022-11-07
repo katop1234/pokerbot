@@ -3,7 +3,7 @@ from helpers import *
 # variables that i'll use later
 does_not_exist = RankObject()
 NUM_ITERATIONS = 10000
-epsilon = 0.015
+# todo add functionality to just plug in confidence value instead of raw SD
 
 ''''''
 ### TEST SUITE ###
@@ -54,8 +54,10 @@ def test_monte_carlo_estimator():
     p = 0.61
     q = 1 - p
     n = NUM_ITERATIONS
-    _2_sd = 2 * (n * p * q) ** 0.5
-    assert p - _2_sd <= p <= p + _2_sd, "this should fail 0.3% of the time"
+    _2_sd = 2 * (p * q / n) ** 0.5
+    if not p - _2_sd <= p_hat <= p + _2_sd:
+        print("expected value between", p - _2_sd, "and", p + _2_sd, "got", p_hat)
+        exit(0)
 
 test_monte_carlo_estimator()
 
@@ -67,7 +69,7 @@ def test_monte_carlo_estimator2():
                            Card("4", "clubs"),
                            Card("10", "diamonds")]
 
-    p = monte_carlo_winning_chance_estimator(hand=test_hand,
+    p_hat = monte_carlo_winning_chance_estimator(hand=test_hand,
                                              num_opponents=6,
                                              cards_on_board=test_cards_on_board,
                                              iterations=NUM_ITERATIONS,
@@ -77,7 +79,9 @@ def test_monte_carlo_estimator2():
     q = 1 - p
     n = NUM_ITERATIONS
     _2_sd = 2 * (n * p * q) ** 0.5
-    assert p - _2_sd <= p <= p + _2_sd, "this should fail 0.3% of the time"
+    if not p - _2_sd <= p_hat <= p + _2_sd:
+        print("expected value between", p - _2_sd, "and", p + _2_sd, "got", p_hat)
+        exit(0)
 
 test_monte_carlo_estimator2()
 
@@ -87,7 +91,7 @@ def test_monte_carlo_estimator3():
 
     test_cards_on_board = []
 
-    p = monte_carlo_winning_chance_estimator(hand=test_hand,
+    p_hat = monte_carlo_winning_chance_estimator(hand=test_hand,
                                              num_opponents=8,
                                              cards_on_board=test_cards_on_board,
                                              iterations=NUM_ITERATIONS,
@@ -96,9 +100,10 @@ def test_monte_carlo_estimator3():
     p = 0.166
     q = 1 - p
     n = NUM_ITERATIONS
-    _2_sd = 2 * (n * p * q) ** 0.5
-    assert p - _2_sd <= p <= p + _2_sd, "this should fail 0.3% of the time"
-
+    _2_sd = 2 * (p * q / n) ** 0.5
+    if not p - _2_sd <= p_hat <= p + _2_sd:
+        print("expected value between", p - _2_sd, "and", p + _2_sd, "got", p_hat)
+        exit(0)
 
 test_monte_carlo_estimator3()
 
@@ -108,7 +113,7 @@ def test_monte_carlo_estimator3():
 
     test_cards_on_board = []
 
-    p = monte_carlo_winning_chance_estimator(hand=test_hand,
+    p_hat = monte_carlo_winning_chance_estimator(hand=test_hand,
                                              num_opponents=3,
                                              cards_on_board=test_cards_on_board,
                                              iterations=NUM_ITERATIONS,
@@ -117,8 +122,10 @@ def test_monte_carlo_estimator3():
     p = 0.159
     q = 1 - p
     n = NUM_ITERATIONS
-    _2_sd = 2 * (n * p * q) ** 0.5
-    assert p - _2_sd <= p <= p + _2_sd, "this should fail 0.3% of the time"
+    _2_sd = 2 * (p * q / n) ** 0.5
+    if not p - _2_sd <= p_hat <= p + _2_sd:
+        print("expected value between", p - _2_sd, "and", p + _2_sd, "got", p_hat)
+        exit(0)
 
 test_monte_carlo_estimator3()
 
@@ -142,11 +149,13 @@ def test_monte_carlo_estimator4():
 
     q1 = 1 - p1
     n = NUM_ITERATIONS
-    _2_sd = 2 * (n * p1 * q1) ** 0.5
-    assert p1 - _2_sd <= p2 <= p1 + _2_sd, "this should fail 0.3% of the time. " \
-                                           "the probabilities should not change" \
-                                           "significantly between two estimates" \
-                                           " of the same parameter."
+    _2_sd = 2 * (p1 * q1 / n) ** 0.5
+    if not p1 - _2_sd <= p2 <= p1 + _2_sd:
+        print("expected value between", p1 - _2_sd, "and", p1 + _2_sd, "got", p2)
+        print( "this should fail 0.3% of the time. " \
+               "the probabilities should not change" \
+               "significantly between two estimates" \
+               " of the same parameter.")
 
 test_monte_carlo_estimator3()
 
