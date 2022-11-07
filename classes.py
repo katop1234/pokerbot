@@ -102,9 +102,9 @@ top_card_map["Q"] = 12
 top_card_map["K"] = 13
 top_card_map["A"] = 14
 
+# we use this in the helpers file
 with open("serialized/top_card.map", 'wb') as pickle_file:
     pickle.dump(top_card_map, pickle_file)
-
 
 class RankObject:
     def __init__(self, ranking=None, top_card=None, kicker1=None, kicker2=None, kicker3=None, kicker4=None):
@@ -131,7 +131,7 @@ class RankObject:
                         if self.kicker3 > other.kicker3:
                             return True
                         elif self.kicker3 == other.kicker3:
-                            if self.kicker4 == other.kicker4:
+                            if self.kicker4 >= other.kicker4:
                                 return True
 
         return False
