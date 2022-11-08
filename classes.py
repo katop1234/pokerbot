@@ -2,15 +2,24 @@ import itertools
 import pickle
 import os
 
+# use these to serialize
+def write(obj, file_name):
+    with open(file_name, 'wb') as x:
+        pickle.dump(obj, x)
+def read(file_name):
+     return pickle.load(open(file_name, "rb"))
+
 class Card:
     card_values = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
     face_values = ["A", "K", "J", "Q"]
     suits = ["spades", "diamonds", "clubs", "hearts"]
 
     def __init__(self, value, suit):
-
         self.value = value.upper()
         self.suit = suit.lower()
+
+        assert self.value in Card.card_values
+        assert self.suit in Card.suits
 
     def __eq__(self, other):
         return self.value == other.value and self.suit == other.suit
@@ -34,7 +43,6 @@ class Card:
                 return 13
             elif val == "A":
                 return 1
-
             else:
                 raise ValueError
 
@@ -44,6 +52,7 @@ class Hand:
         assert type(card1) is Card
         assert type(card2) is Card
         assert card1 != card2, "both cards can't be the same"
+
         self.card1 = card1
         self.card2 = card2
 
@@ -101,23 +110,34 @@ top_card_map["Q"] = 12
 top_card_map["K"] = 13
 top_card_map["A"] = 14
 
-# we use this in the helpers file
-with open("serialized/top_card.map", 'wb') as pickle_file:
-    pickle.dump(top_card_map, pickle_file)
+def reverse_lookup(value_desired, dic):
+    '''looks up dictionary key from value'''
+    return next(key for key, value in dic.items() if value == value_desired)
 
 class RankObject:
     def __init__(self, ranking=None, top_card=None, kicker1=None, kicker2=None, kicker3=None, kicker4=None):
-        self.ranking = ranking_map[ranking]
+        self.ranking_value = ranking_map[ranking]
         self.top_card = top_card_map[top_card]
         self.kicker1 = top_card_map[kicker1]
         self.kicker2 = top_card_map[kicker2]
         self.kicker3 = top_card_map[kicker3]
         self.kicker4 = top_card_map[kicker4]
 
+    def __repr__(self):
+        return str(reverse_lookup(self.ranking_value, ranking_map)) + \
+               str(" ") + \
+               str([
+                   reverse_lookup(self.top_card, top_card_map),
+                   reverse_lookup(self.kicker1, top_card_map),
+                   reverse_lookup(self.kicker2, top_card_map),
+                   reverse_lookup(self.kicker3, top_card_map),
+                   reverse_lookup(self.kicker4, top_card_map),
+                                ])
+
     def __ge__(self, other):
-        if self.ranking > other.ranking:
+        if self.ranking_value > other.ranking_value:
             return True
-        elif self.ranking == other.ranking:
+        elif self.ranking_value == other.ranking_value:
             if self.top_card > other.top_card:
                 return True
             elif self.top_card == other.top_card:
@@ -136,7 +156,7 @@ class RankObject:
         return False
 
     def __eq__(self, other):
-        if self.ranking == other.ranking:
+        if self.ranking_value == other.ranking_value:
             if self.top_card == other.top_card:
                 if self.kicker1 == other.kicker1:
                     if self.kicker2 == other.kicker2:
