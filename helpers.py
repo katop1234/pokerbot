@@ -174,15 +174,15 @@ def best_card_ranking_generalized(cards, n1, n2=0, n3=0, n4=0, n5=0):
     output = []
     sizes = [n1, n2, n3, n4, n5]
 
+    card_counts = dict()
+    for card in cards:
+        if card.value not in card_counts:
+            card_counts[card.value] = 0
+        card_counts[card.value] += 1
+
     for size in sizes:
         if size == 0:
             return output
-
-        card_counts = dict()
-        for card in cards:
-            if card.value not in card_counts:
-                card_counts[card.value] = 0
-            card_counts[card.value] += 1
 
         top_card_value = None
         for card_value_seen in card_counts:
@@ -332,4 +332,7 @@ def monte_carlo_winning_chance_estimator(hand, num_opponents, cards_on_board, it
 
         wins += win
 
-    return wins / iterations
+    p = wins / iterations
+    sd = (p * (1-p) / iterations) ** 0.5
+    print("99.7% confidence interval", [round(p-3*sd, 3), round(p+3*sd, 3)])
+    return p
