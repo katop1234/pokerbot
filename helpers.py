@@ -12,8 +12,7 @@ def write(obj, file_name):
 def read(file_name):
     return pickle.load(open(file_name, "rb"))
 
-
-def get_all_cards():
+def write_all_cards():
     if os.path.exists("serialized/all.cards"):
         return read("serialized/all.cards")
     else:
@@ -24,6 +23,11 @@ def get_all_cards():
             all_cards.append(Card(card[0], card[1]))
 
         return all_cards
+
+all_cards = write_all_cards()
+
+def get_all_cards():
+    return all_cards
 
 def write_all_hands():
     if os.path.exists("serialized/all.hands"):
@@ -49,15 +53,13 @@ def get_all_hands():
 def get_remaining_cards(hand, cards_on_board):
     all_cards = get_all_cards()
 
-    # remove cards in my hand
-    all_cards.remove(hand.card1)
-    all_cards.remove(hand.card2)
+    cards_to_remove = [hand.card1, hand.card2] + cards_on_board
 
-    # remove cards on board
-    for card in cards_on_board:
-        all_cards.remove(card)
+    valid_cards = []
+    for card in all_cards:
+        if card not in cards_to_remove:
+            valid_cards.append(card)
 
-    valid_cards = all_cards
     return valid_cards
 
 def get_simulated_opponents_hands(cards_sampled, num_opponents):
@@ -66,17 +68,29 @@ def get_simulated_opponents_hands(cards_sampled, num_opponents):
 def get_simulated_cards_on_board(cards_sampled, num_cards_left_to_reveal):
     return cards_sampled[-num_cards_left_to_reveal:]
 
-def royal_flush_value(cards):
-    values_per_suit = dict()
-    for suit in Card.suits:
-        values_per_suit[suit] = []
-
-    valid_values = ["A", "K", "Q", "J", "10"]
+def hasFlush(cards):
+    cards_by_suit = dict()
     for card in cards:
-        if card.value in valid_values:
-            values_per_suit[card.suit].append(card.value)
-        if len(values_per_suit[card.suit]) == 5:
-            return RankObject("royal_flush", "A")
+        if card.suit not in cards_by_suit:
+            cards_by_suit[card.suit] = []
+        cards_by_suit[card.suit].append(card)
+        if len(cards_by_suit[card.suit]) == 5:
+            return True
+    return False
+
+def royal_flush_value(cards):
+
+    if hasFlush(cards):
+        values_per_suit = dict()
+        for suit in Card.suits:
+            values_per_suit[suit] = []
+
+        valid_values = ["A", "K", "Q", "J", "10"]
+        for card in cards:
+            if card.value in valid_values:
+                values_per_suit[card.suit].append(card.value)
+            if len(values_per_suit[card.suit]) == 5:
+                return RankObject("royal_flush", "A")
 
     return RankObject()
 
@@ -281,7 +295,6 @@ def get_hand_ranking(hand, board, verbose=False):
         x = high_card_value(seven_cards)
         if verbose: print(x)
         return high_card_value(seven_cards)
-
 
 def my_hand_is_better(my_hand, opp_hand, board):
     my_hand_ranking = get_hand_ranking(my_hand, board, verbose=False)

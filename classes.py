@@ -77,7 +77,6 @@ class Opponents:
     def __repr__(self):
         return str(self.opp_hands)
 
-
 ranking_map = dict()
 ranking_map[None] = -float("inf")
 ranking_map["high_card"] = 1
