@@ -1,4 +1,4 @@
-from helpers import *
+from monte_carlo_helpers import *
 import inspect
 
 # variables that i'll use later
@@ -177,11 +177,8 @@ def test_monte_carlo_estimator():
                            Card("4", "clubs"),
                            Card("10", "diamonds")]
 
-    p_hat = monte_carlo_winning_chance_estimator(hand=test_hand,
-                                         num_opponents=4,
-                                         cards_on_board=test_cards_on_board,
-                                         iterations=NUM_ITERATIONS,
-                                         verbose=False)
+    p_hat = get_probability_of_winning(hand=test_hand, num_opponents=4, cards_on_board=test_cards_on_board,
+                                       verbose=False)
 
     p = 0.61
     q = 1 - p
@@ -200,11 +197,8 @@ def test_monte_carlo_estimator2():
                            Card("4", "clubs"),
                            Card("10", "diamonds")]
 
-    p_hat = monte_carlo_winning_chance_estimator(hand=test_hand,
-                                             num_opponents=6,
-                                             cards_on_board=test_cards_on_board,
-                                             iterations=NUM_ITERATIONS,
-                                             verbose=False)
+    p_hat = get_probability_of_winning(hand=test_hand, num_opponents=6, cards_on_board=test_cards_on_board,
+                                       verbose=False)
 
     p = 0.822
     q = 1 - p
@@ -222,11 +216,8 @@ def test_monte_carlo_estimator3():
 
     test_cards_on_board = []
 
-    p_hat = monte_carlo_winning_chance_estimator(hand=test_hand,
-                                             num_opponents=8,
-                                             cards_on_board=test_cards_on_board,
-                                             iterations=NUM_ITERATIONS,
-                                             verbose=False)
+    p_hat = get_probability_of_winning(hand=test_hand, num_opponents=8, cards_on_board=test_cards_on_board,
+                                       verbose=False)
 
     p = 0.166
     q = 1 - p
@@ -244,11 +235,8 @@ def test_monte_carlo_estimator4():
 
     test_cards_on_board = []
 
-    p_hat = monte_carlo_winning_chance_estimator(hand=test_hand,
-                                             num_opponents=3,
-                                             cards_on_board=test_cards_on_board,
-                                             iterations=NUM_ITERATIONS,
-                                             verbose=False)
+    p_hat = get_probability_of_winning(hand=test_hand, num_opponents=3, cards_on_board=test_cards_on_board,
+                                       verbose=False)
 
     p = 0.159
     q = 1 - p
@@ -266,17 +254,9 @@ def test_monte_carlo_estimator5():
 
     test_cards_on_board = []
 
-    p1 = monte_carlo_winning_chance_estimator(hand=test_hand,
-                                             num_opponents=4,
-                                             cards_on_board=test_cards_on_board,
-                                             iterations=NUM_ITERATIONS,
-                                             verbose=False)
+    p1 = get_probability_of_winning(hand=test_hand, num_opponents=4, cards_on_board=test_cards_on_board, verbose=False)
 
-    p2 = monte_carlo_winning_chance_estimator(hand=test_hand,
-                                              num_opponents=4,
-                                              cards_on_board=test_cards_on_board,
-                                              iterations=NUM_ITERATIONS,
-                                              verbose=False)
+    p2 = get_probability_of_winning(hand=test_hand, num_opponents=4, cards_on_board=test_cards_on_board, verbose=False)
 
     q1 = 1 - p1
     n = NUM_ITERATIONS

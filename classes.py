@@ -153,6 +153,25 @@ class RankObject:
                                 return True
 
         return False
+    def __gt__(self, other):
+        if self.ranking_value > other.ranking_value:
+            return True
+        elif self.ranking_value == other.ranking_value:
+            if self.top_card > other.top_card:
+                return True
+            elif self.top_card == other.top_card:
+                if self.kicker1 > other.kicker1:
+                    return True
+                elif self.kicker1 == other.kicker1:
+                    if self.kicker2 > other.kicker2:
+                        return True
+                    elif self.kicker2 == other.kicker2:
+                        if self.kicker3 > other.kicker3:
+                            return True
+                        elif self.kicker3 == other.kicker3:
+                            if self.kicker4 > other.kicker4:
+                                return True
+        return False
 
     def __eq__(self, other):
         if self.ranking_value == other.ranking_value:
