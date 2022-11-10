@@ -315,14 +315,19 @@ def my_hand_is_better(my_hand, opp_hand, board):
     else:
         return False
 
-def get_probability_of_winning(hand, num_opponents, cards_on_board, num_games_simulated=float("inf"), time_length=float("inf"), verbose=False):
+def get_probability_of_winning(hand, num_opponents, cards_on_board, num_games_simulated=float("inf"),
+                               time_length=float("inf"), verbose=False):
     assert type(hand) is Hand
     assert num_opponents >= 1 and num_opponents <= 10
     assert len(cards_on_board) <= 5
     assert num_games_simulated < float("inf") or time_length < float("inf")
 
-    # todo add in code to check if this combination has been memoized already
+    # todo uncomment this so we check here first for memoized result
+    # todo and also make sure there's no circular imports
+    # from game_logic_helpers import get_preflop_odds_key, get_pre_flop_odds_memoized
+
     # lookup = get_preflop_odds_key(hand, num_opponents, cards_on_board)
+    # pre_flop_odds_memoized = get_pre_flop_odds_memoized()
     # if lookup in pre_flop_odds_memoized:
     #     return pre_flop_odds_memoized[lookup]
 
@@ -361,8 +366,6 @@ def get_probability_of_winning(hand, num_opponents, cards_on_board, num_games_si
     sd = (p * (1 - p) / iterations) ** 0.5
     print("99.7% confidence interval", [round(p - 3 * sd, 3), round(p + 3 * sd, 3)], "for", iterations, "iterations")
     return p
-
-
 
 # todo memoize probabilities for easy lookup
 # todo make sure cases like A spade K spade are treated the same as A heart K heart preflop

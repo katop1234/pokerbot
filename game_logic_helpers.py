@@ -2,10 +2,8 @@ import scipy.stats as st
 from monte_carlo_helpers import *
 import matplotlib.pyplot as plt
 
-
-def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.8):
-    # todo put this function in logic.py
-    # todo this function is bad
+# todo this function sucks
+def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.9):
     '''
       returns the optimal betting size x subject to the probability of making money being
       above a certain threshold
@@ -21,11 +19,18 @@ def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.8):
     best_x = 0
     curr_best_EV = -float("inf")
     p_losing = 1 - p_winning
+    breakeven_x = p_winning / (1 - 2 * p_winning) # derived from x / (1 + 2x) = p_win
+    # assuming one person calls, we have a pot size of 1+2x
+    # and we put in x into the pot
+
+    print("upper limit on x", breakeven_x)
 
     for i in range(101):
         x = 0.01 * i
+        if x > breakeven_x:
+            break
 
-        win_money = -x + 1 + x + 5 * x
+        win_money = 1 + x # assume one more person calls
         lose_money = -x
 
         EV = p_winning * win_money + p_losing * lose_money
@@ -41,11 +46,14 @@ def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.8):
                 best_x = x
 
         print("betsize", x, "Ev", round(EV, 3), "P+", round(p_making_money, 4))
+
     return best_x
+
+print(optimal_bet_proportion(0.3))
+exit()
 
 def get_pre_flop_odds_memoized():
     return read("serialized/pre_flop_odds")
-
 
 def write_pre_flop_odds_memoized(pre_flop_odds_dict):
     write(pre_flop_odds_dict, "serialized/pre_flop_odds")
@@ -68,15 +76,16 @@ def get_preflop_odds_key(hand, num_opponents=5, cards_on_board=[]):
     key_from_hand = ""
     num_suits_seen = 1
 
+    key_from_hand += card1_val
+    key_from_hand += "s" + str(num_suits_seen) + "_"
+
     if card2_suit != card1_suit:
         num_suits_seen += 1
 
-    key_from_hand += card1_val
-    key_from_hand += "s" + str(num_suits_seen)
     key_from_hand += card2_val
-    key_from_hand += "s" + str(num_suits_seen)
+    key_from_hand += "s" + str(num_suits_seen) + "_"
 
-    key_from_num_opp = str(num_opponents)
+    key_from_num_opp = str(num_opponents) + "opps_"
 
     key_from_cards_on_board = ""
     cards_on_board.sort(key=lambda c: c.value_for_sorting())
@@ -85,33 +94,40 @@ def get_preflop_odds_key(hand, num_opponents=5, cards_on_board=[]):
             num_suits_seen += 1
 
         key_from_cards_on_board += card.value
-        key_from_cards_on_board += "s" + str(num_suits_seen)
+        key_from_cards_on_board += "s" + str(num_suits_seen) + "_"
 
-    return key_from_hand + key_from_num_opp + key_from_cards_on_board
+    return key_from_hand + key_from_cards_on_board + key_from_num_opp
 
-
-def get_memoized_odd(hand, num_opponents=5, cards_on_board=[]):
+def get_pre_flop_memoized_odd(hand, num_opponents=5, cards_on_board=[]):
     lookup = get_preflop_odds_key(hand, num_opponents, cards_on_board)
-    return pre_flop_odds_memoized[lookup]
+    print("lookup for memoized", lookup, "dict rn", pre_flop_odds_memoized)
+    return get_pre_flop_odds_memoized()[lookup]
 
+def memoize_probabilities_preflop():
+    for _ in range(3):
+        print("WARNING! Each probability has been calculated with 100,000 simulated games. Do not overwrite unless "
+              "you've run at least that many iterations. This runs for about 2 minutes per hand for 169 unique hands.")
+        time.sleep(0)
 
-# memoize
-# pre_flop_odds_memoized = {}
-# all_hands = get_all_hands()
-# for hand in all_hands:
-#     key = get_preflop_odds_key(hand, num_opponents=5, cards_on_board=[])
-#     if key not in pre_flop_odds_memoized:
-#         p_winning = get_probability_of_winning(hand, 5, cards_on_board=[], num_games_simulated=100000)
-#         pre_flop_odds_memoized[key] = p_winning
-#         write_pre_flop_odds_memoized(pre_flop_odds_memoized)
-#         print("memoized", hand, "p winning", p_winning)
-#         print("% memoized", len(pre_flop_odds_memoized) / 169)
-#     else:
-#         print("previously memoized", hand, "p winning", get_memoized_odd(hand, num_opponents=5, cards_on_board=[]))
+    pre_flop_odds_memoized = get_pre_flop_odds_memoized() # change this to {} if you want to start fresh
+    print("dict before starting", pre_flop_odds_memoized)
+
+    all_hands = get_all_hands()
+    for hand in all_hands:
+        key = get_preflop_odds_key(hand, num_opponents=5, cards_on_board=[])
+        if key not in pre_flop_odds_memoized:
+            p_winning = get_probability_of_winning(hand, 5, cards_on_board=[], num_games_simulated=100000)
+            pre_flop_odds_memoized[key] = p_winning
+            write_pre_flop_odds_memoized(pre_flop_odds_memoized)
+            print("memoized", hand, "p winning", p_winning)
+            print("% memoized", len(pre_flop_odds_memoized) / 169)
+        else:
+            print("previously memoized", hand, "p winning",
+                  get_pre_flop_memoized_odd(hand, num_opponents=5, cards_on_board=[]))
 
 
 def get_hand_percentile(hand, num_opponents=5):
-    p_winning = get_memoized_odd(hand, num_opponents=num_opponents, cards_on_board=[])
+    p_winning = get_pre_flop_memoized_odd(hand, num_opponents=num_opponents, cards_on_board=[])
     pre_flop_odds_memoized = get_pre_flop_odds_memoized()
 
     ps_of_winning = []
@@ -125,6 +141,8 @@ def get_hand_percentile(hand, num_opponents=5):
             break
 
     return i / (len(ps_of_winning) - 1)
+
+memoize_probabilities_preflop()
 
 hand = Hand(Card("2", "clubs"), Card('3', "hearts"))
 print(get_hand_percentile(hand))
