@@ -28,12 +28,16 @@ def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.75, edge
     #  for x < 0 (the expected loss) and make sure it's above a certain amount. So EVEN IF we lose, we only lose
     #  by some salvageable amount. This will also help prevent us from overbetting and causing others to fold.
 
-    if p_winning == 1:
-        # avoid division by zero error
-        p_winning = 0.99
+    # avoid division by zero error
+    if p_winning == 1: p_winning = 0.999
 
     p_losing = 1 - p_winning
 
+    # assume there's 1 in the pot, and we want to bet x. If we have a probability p of winning, then the breakeven
+    # is p * (1) + (1-p) * x = 0. Solving for x, we get x = p / (1 - p). We demand some edge so reduce this number,
+    # and now we have an upper bound on what x should be. However, this might still be quite large, so we use the
+    # rest of the code to reduce it until the probability of losing money / the expected amount of money we lose if
+    # we lose are manageable also.
     upper_bound_x = p_winning / p_losing - edge_demanded
 
     for i in range(int(1e5)):
