@@ -316,10 +316,23 @@ def my_hand_is_better(my_hand, opp_hand, board):
     my_hand_ranking = get_hand_ranking(my_hand, board, verbose=False)
     opp_hand_ranking = get_hand_ranking(opp_hand, board)
 
-    if my_hand_ranking >= opp_hand_ranking:  # ties are counted as wins
+    # todo i counted ties as wins, but maybe somewhere down the line this
+    #  would affect my ev calculation ever so slightly and make it suboptimal?
+    if my_hand_ranking >= opp_hand_ranking:
         return True
     else:
         return False
+
+
+def no_repeat_cards_seen(hand, cards_on_board):
+    seen_cards = hand.get_list_of_cards() + cards_on_board
+    seen = set()
+    for card in seen_cards:
+        if card in seen:
+            return False
+        seen.add(card)
+    return True
+
 
 def get_probability_of_winning(hand, num_opponents, cards_on_board, num_games_simulated=float("inf"),
                                time_length=float("inf"), verbose=False):
@@ -328,14 +341,17 @@ def get_probability_of_winning(hand, num_opponents, cards_on_board, num_games_si
     assert len(cards_on_board) <= 5
     assert num_games_simulated < float("inf") or time_length < float("inf")
 
-    # todo uncomment this so we check here first for memoized result
-    # todo and also make sure there's no circular imports
-    # from game_logic_helpers import get_preflop_odds_key, get_pre_flop_odds_memoized
+    # TODO uncomment this so we check here first for memoized result
+    #  and also make sure there's no circular imports
+    #  from game_logic_helpers import get_preflop_odds_key, get_pre_flop_odds_memoized
 
     # lookup = get_preflop_odds_key(hand, num_opponents, cards_on_board)
     # pre_flop_odds_memoized = get_pre_flop_odds_memoized()
     # if lookup in pre_flop_odds_memoized:
     #     return pre_flop_odds_memoized[lookup]
+
+    # Make sure no repeat cards were sent in as args:
+    assert no_repeat_cards_seen(hand, cards_on_board)
 
     valid_cards = get_remaining_cards(hand, cards_on_board)
 
