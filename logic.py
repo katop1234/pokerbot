@@ -10,6 +10,9 @@ print("MY CARDS", test_hand)
 print("--------")
 
 test_cards_on_board = [
+    Card("J", "spades"),
+    Card("10", "clubs"),
+    Card("10", "spades")
 ]
 
 print("CARDS ON BOARD", test_cards_on_board)
@@ -17,7 +20,11 @@ print("--------")
 
 print(
     "Probability of having the best hand:",
-    get_probability_of_winning(hand=test_hand, num_opponents=5, cards_on_board=test_cards_on_board, verbose=False)
+    get_probability_of_winning(hand=test_hand,
+                               num_opponents=5,
+                               cards_on_board=test_cards_on_board,
+                               num_games_simulated=1000,
+                               verbose=False)
 )
 
 exit(0)

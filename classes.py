@@ -62,6 +62,9 @@ class Hand:
     def __eq__(self, other):
         return self.card1 == other.card1 and self.card2 == other.card2
 
+    def get_list_of_cards(self):
+        return [self.card1, self.card2]
+
 
 class Opponents:
     def __init__(self, cards_sampled, num_opponents):

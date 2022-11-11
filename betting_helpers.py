@@ -1,3 +1,4 @@
+import numpy as np
 import scipy.stats as st
 from monte_carlo_helpers import *
 import matplotlib.pyplot as plt
@@ -9,68 +10,59 @@ import matplotlib.pyplot as plt
 #  if i can't code it up rn, at least leave space to add it in later!!!
 
 # todo this function sucks
-def optimal_bet_proportion(p_winning, num_villains, min_probability_of_making_money=0.9):
-    '''
-      returns the optimal betting size x subject to the probability of making money being
-      above a certain threshold
-        # In this calculation, we assume that only 1 opponent calls us. This is the
-        # worst case scenario that we account for. If all 5 opponents call us, we
-        # have the best possible EV, so I don't want to model based on that. If 0
-        # call us, the p_winning changes to 1, so our EV calculation is useless.
-        # Therefore, we assume that one opponent will always call us, and this
-        # helps us model it as a binary indicator (win or lose) and the calculation
-        # for standard deviation checks out and is much simpler.
-      '''
-    num_players = num_villains + 1
-    if p_winning <= 1 / num_players:
-        # If there are 4 players who we have to play against and we have
-        # a less than 0.25 chance of winning, we shouldn't play at all
-        # note this isn't the TOTAL number of players, just those who
-        # haven't folded yet since now the probability of winning is
-        # evenly split amongst those guys
-        # JK Idk if this is good
-        return 0
+# redo this function its too confusing and lacks a solid direction
+# def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.8):
+#     '''
+#       returns the optimal betting size x subject to the probability of making money being
+#       above a certain threshold
+#
+#         # In this calculation, we assume that only 1 opponent calls us. This is the
+#         # worst case scenario that we account for. If all 5 opponents call us, we
+#         # have the best possible EV, so I don't want to model based on that. If 0
+#         # call us, the p_winning changes to 1, so our EV calculation is useless.
+#         # Therefore, we assume that one opponent will always call us, and this
+#         # helps us model it as a binary indicator (win or lose) and the calculation
+#         # for standard deviation checks out and is much simpler.
+#       '''
+#
+#     edge_demanded = 0.05  # TODO can be changed later
+#
+#     best_x = 0
+#     p_losing = 1 - p_winning
+#
+#     upper_bound_on_x = p_winning / p_losing  # break even point, never bet more than this
+#     upper_bound_on_x = upper_bound_on_x - edge_demanded
+#
+#     print("breakeven x", upper_bound_on_x)
+#
+#     for i in range(int(1e100)):
+#         dx = 0.01 * i
+#         x = upper_bound_on_x - dx
+#         if x > upper_bound_on_x or x < 0:
+#             break
+#
+#         gains_from_winning = 1
+#         losses_from_losing = -x
+#
+#         EV = p_winning * gains_from_winning + p_losing * losses_from_losing
+#
+#         var = ((p_winning * gains_from_winning - EV) ** 2 + (p_losing * losses_from_losing - EV) ** 2) / 2
+#         std = var ** 0.5
+#
+#         p_making_money = st.norm.cdf(EV / std)
+#
+#         if p_making_money > min_probability_of_making_money:
+#             best_x = x
+#
+#         print("betsize", x, "Ev", round(EV, 3), "P+", round(p_making_money, 4))
+#
+#     return max(best_x, 0)
 
-    edge_demanded = 0.05  # TODO can be changed later
+def optimal_bet_proportion():
+    # todo first plan out this entire function before writing any code !!!!!
+    return
 
-    best_x = 0
-    p_losing = 1 - p_winning
-    best_EV = -float("inf")
-
-    upper_bound_on_x = p_winning / p_losing  # break even point, never bet more than this
-    upper_bound_on_x = upper_bound_on_x - edge_demanded
-
-    print("breakeven x", upper_bound_on_x)
-
-    for i in range(101):
-        dx = 0.01 * i
-        x = upper_bound_on_x - dx
-        if x > upper_bound_on_x or x <= 0:
-            best_x = x
-            break
-
-        gains_from_winning = 1 + num_villains * x
-        losses_from_losing = -x
-
-        EV = p_winning * gains_from_winning + p_losing * losses_from_losing
-
-        var = ((p_winning * gains_from_winning - EV) ** 2 + (p_losing * losses_from_losing - EV) ** 2) / 2
-        std = var ** 0.5
-
-        p_making_money = st.norm.cdf(EV / std)
-
-        if p_making_money > min_probability_of_making_money:
-            if EV > best_EV:
-                best_EV = EV
-                best_x = x
-
-        print("betsize", x, "Ev", round(EV, 3), "P+", round(p_making_money, 4))
-
-    return max(best_x, 0)
-
-
-print(optimal_bet_proportion(0.3, 4))
-exit()
+print(optimal_bet_proportion())
 
 def get_pre_flop_probabilities_dict_memoized():
     return read("serialized/pre_flop_odds")
@@ -163,18 +155,17 @@ def get_hand_percentile(hand, num_opponents=5):
 
     return i / (len(ps_of_winning) - 1)
 
-# todo delete these two lines
-# #write_pre_flop_odds_memoized({})
-# memoize_probabilities_preflop()
 
-hand = Hand(Card("2", "clubs"), Card('3', "hearts"))
-print(get_hand_percentile(hand))
+def visualize_preflop_hand_percentiles_5_opps():
+    d = get_pre_flop_probabilities_dict_memoized()
+    l = list()
+    for key in d:
+        l.append([key, d[key]])
 
-d = get_pre_flop_probabilities_dict_memoized()
-l = list()
-for key in d:
-    l.append([key, d[key]])
+    print("HANDS AND THEIR CORRESPONDING PERCENTILES")
+    l.sort(key=lambda x:-x[1])
+    for i in range(len(l)):
+        print(i, l[i])
 
-l.sort(key=lambda x:-x[1])
-for i in range(len(l)):
-    print(i, l[i])
+    plt.hist([d[hand] for hand in d], bins=20)
+    plt.show()
