@@ -339,7 +339,7 @@ def get_probability_of_winning(hand, num_opponents, cards_on_board, num_games_si
     assert type(hand) is Hand
     assert num_opponents >= 1 and num_opponents <= 10
     assert len(cards_on_board) <= 5
-    assert num_games_simulated < float("inf") or time_length < float("inf")
+    assert num_games_simulated < float("inf") or time_length < float("inf"), "specify one of the two"
 
     # TODO uncomment this so we check here first for memoized result
     #  and also make sure there's no circular imports
@@ -386,5 +386,6 @@ def get_probability_of_winning(hand, num_opponents, cards_on_board, num_games_si
 
     p = wins / iterations
     sd = (p * (1 - p) / iterations) ** 0.5
-    print("99.7% confidence interval", [round(p - 3 * sd, 3), round(p + 3 * sd, 3)], "for", iterations, "iterations")
+    print("99.7% confidence interval", [round(p - 3 * sd, 3), round(p + 3 * sd, 3)],
+          "for", iterations, "iterations")
     return p

@@ -3,66 +3,49 @@ import scipy.stats as st
 from monte_carlo_helpers import *
 import matplotlib.pyplot as plt
 
+
 # todo what if i add genetc / rl algo - assign values to traits like bluffing,
 #  aggressiveness, randomness, etc. and incudenthat into ur behavior. also
 #  maybe is there a way for the model to learn from what others are doing to
 #  make money?
 #  if i can't code it up rn, at least leave space to add it in later!!!
 
-# todo this function sucks
-# redo this function its too confusing and lacks a solid direction
-# def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.8):
-#     '''
-#       returns the optimal betting size x subject to the probability of making money being
-#       above a certain threshold
-#
-#         # In this calculation, we assume that only 1 opponent calls us. This is the
-#         # worst case scenario that we account for. If all 5 opponents call us, we
-#         # have the best possible EV, so I don't want to model based on that. If 0
-#         # call us, the p_winning changes to 1, so our EV calculation is useless.
-#         # Therefore, we assume that one opponent will always call us, and this
-#         # helps us model it as a binary indicator (win or lose) and the calculation
-#         # for standard deviation checks out and is much simpler.
-#       '''
-#
-#     edge_demanded = 0.05  # TODO can be changed later
-#
-#     best_x = 0
-#     p_losing = 1 - p_winning
-#
-#     upper_bound_on_x = p_winning / p_losing  # break even point, never bet more than this
-#     upper_bound_on_x = upper_bound_on_x - edge_demanded
-#
-#     print("breakeven x", upper_bound_on_x)
-#
-#     for i in range(int(1e100)):
-#         dx = 0.01 * i
-#         x = upper_bound_on_x - dx
-#         if x > upper_bound_on_x or x < 0:
-#             break
-#
-#         gains_from_winning = 1
-#         losses_from_losing = -x
-#
-#         EV = p_winning * gains_from_winning + p_losing * losses_from_losing
-#
-#         var = ((p_winning * gains_from_winning - EV) ** 2 + (p_losing * losses_from_losing - EV) ** 2) / 2
-#         std = var ** 0.5
-#
-#         p_making_money = st.norm.cdf(EV / std)
-#
-#         if p_making_money > min_probability_of_making_money:
-#             best_x = x
-#
-#         print("betsize", x, "Ev", round(EV, 3), "P+", round(p_making_money, 4))
-#
-#     return max(best_x, 0)
+def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.8, edge_demanded=0.05):
+    '''
+    ok here's my plan
+    find the breakeven betting value x = p/q - e (where e is the edge we demand, probably fix at 0.05)
 
-def optimal_bet_proportion():
-    # todo first plan out this entire function before writing any code !!!!!
-    return
+    keep lowering x until the probability of making money is just above 90%. if this isn't possible, x is 0. simple.
 
-print(optimal_bet_proportion())
+    therefore we will make money 90% or more of the time, and this will always be a positive EV bet for us.
+    '''
+
+    p_losing = 1 - p_winning
+
+    upper_bound_x = p_winning / p_losing - edge_demanded
+
+    for i in range(int(1e5)):
+        dx = 0.001 * i
+        x = upper_bound_x - dx
+
+        if x <= 0 or x > upper_bound_x:
+            # something's funky
+            break
+
+        gains_from_winning = 1
+        losses_from_losing = -x
+
+        EV = p_winning * gains_from_winning + p_losing * losses_from_losing
+
+        var = ((p_winning * gains_from_winning - EV) ** 2 + (p_losing * losses_from_losing - EV) ** 2) / 2
+        std = var ** 0.5
+
+        p_making_money = st.norm.cdf(EV / std)
+        print("betting", round(x, 3), "ev", EV, "P+", round(p_making_money, 3))
+        if p_making_money >= min_probability_of_making_money:
+            return x
+
+    return 0
 
 def get_pre_flop_probabilities_dict_memoized():
     return read("serialized/pre_flop_odds")
@@ -163,7 +146,7 @@ def visualize_preflop_hand_percentiles_5_opps():
         l.append([key, d[key]])
 
     print("HANDS AND THEIR CORRESPONDING PERCENTILES")
-    l.sort(key=lambda x:-x[1])
+    l.sort(key=lambda x: -x[1])
     for i in range(len(l)):
         print(i, l[i])
 
