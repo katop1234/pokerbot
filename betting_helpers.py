@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 #  make money?
 #  if i can't code it up rn, at least leave space to add it in later!!!
 
-def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.8, edge_demanded=0.05):
+def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.75, edge_demanded=0.05):
     '''
     ok here's my plan
     find the breakeven betting value x = p/q - e (where e is the edge we demand, probably fix at 0.05)
@@ -20,12 +20,16 @@ def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.8, edge_
     therefore we will make money 90% or more of the time, and this will always be a positive EV bet for us.
     '''
 
+    if p_winning == 1:
+        # avoid division by zero error
+        p_winning = 0.99
+
     p_losing = 1 - p_winning
 
     upper_bound_x = p_winning / p_losing - edge_demanded
 
     for i in range(int(1e5)):
-        dx = 0.001 * i
+        dx = 0.01 * i
         x = upper_bound_x - dx
 
         if x <= 0 or x > upper_bound_x:
