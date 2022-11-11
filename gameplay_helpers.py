@@ -1,12 +1,14 @@
+import random
 import matplotlib.pyplot as plt
 import numpy as np
+from betting_helpers import get_hand_percentile, optimal_bet_proportion
 
 
 def wind_mouse(start_x, start_y, dest_x, dest_y, G_0=9, W_0=3, M_0=15, D_0=12, move_mouse=lambda x, y: None):
     '''
     WindMouse algorithm. Calls the move_mouse kwarg with each new step.
     Released under the terms of the GPLv3 license.
-    G_0 - magnitude of the gravitational fornce
+    G_0 - magnitude of the gravitational force
     W_0 - magnitude of the wind force fluctuations
     M_0 - maximum step size (velocity clip threshold)
     D_0 - distance where wind behavior changes from random to damped
@@ -109,7 +111,7 @@ def get_optimal_bet_size():
     see game_logic_helpers.optimal_bet_proportion
     '''
     pot_size = get_pot_size()
-    optimal_bet_proportion = optimal_bet_proportion()
+    optimal_bet_proportion = optimal_bet_proportion() # todo import this from betting_helpers when its done
 
     return optimal_bet_proportion * pot_size
 
@@ -131,7 +133,7 @@ def get_amount_to_call():
     raise NotImplementedError
 
 
-def get_min_raise():
+def get_min_raise_amount():
     raise NotImplementedError
 
 
@@ -195,20 +197,25 @@ def raise_by(x):
         send_raise_command_for(lower_num * bb_size)
 
 
+# todo for any function that requires me to make a "move", add the
+# todo assert is_my_turn_now() line first
+
 def call():
     assert is_my_turn_now()
 
-    if x >= get_my_balance():
-        go_all_in()
+    # todo add code to go all in if the min to call is larger than my balance
 
     raise NotImplementedError
 
 
+# todo make sure we only call this function anytime we want to call/check/fold/raise
+#  this is because this function is a generalization of all of those where
+#  bet(0) is the same as check(), and if bet(0) is not possible it becomes fold()
+#  and bet(k) ends up being a raise by k if that's possible,
+#  otherwise a call of the curr call value
 def bet(x):
-    # todo should i add code for when the bet size is ridiculously big?
-    # todo for example if the pot is $20, and we get a bet
     amount_to_call = get_amount_to_call()
-    min_raise = get_min_raise()
+    min_raise = get_min_raise_amount()
 
     if amount_to_call + min_raise <= x:
         raise_by(x)
@@ -219,6 +226,10 @@ def bet(x):
 
 
 def get_big_blind_size():
+    raise NotImplementedError
+
+def get_num_of_opponents_still_in():
+    # number of other players who haven't folded by the time it's your turn
     raise NotImplementedError
 
 
@@ -242,7 +253,7 @@ def make_betting_decision_preflop(hand, num_opponents=5):
             check()
         elif percentile >= 146 / 169:  # raise 1-3x bb for these
             big_blind_size = get_big_blind_size()
-            num_big_blinds_to_raise_by = random.randint(1, 3)
+            num_big_blinds_to_raise_by = random.randint(1, 5)
             bet(big_blind_size * num_big_blinds_to_raise_by)
         else:
             fold()

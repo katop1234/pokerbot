@@ -236,42 +236,48 @@ def four_of_a_kind_value(cards):
     best_cards = best_card_ranking_generalized(cards, 4, 1)
     if None in best_cards:
         return RankObject()
-    return RankObject("four_of_a_kind", best_cards[0], best_cards[1])
+    else:
+        return RankObject("four_of_a_kind", best_cards[0], best_cards[1])
 
 
 def full_house_value(cards):
     best_cards = best_card_ranking_generalized(cards, 3, 2)
     if None in best_cards:
         return RankObject()
-    return RankObject("full_house", best_cards[0], best_cards[1])
+    else:
+        return RankObject("full_house", best_cards[0], best_cards[1])
 
 
 def three_of_a_kind_value(cards):
     best_cards = best_card_ranking_generalized(cards, 3, 1, 1)
     if None in best_cards:
         return RankObject()
-    return RankObject("three_of_a_kind", best_cards[0], best_cards[1], best_cards[2])
+    else:
+        return RankObject("three_of_a_kind", best_cards[0], best_cards[1], best_cards[2])
 
 
 def two_pair_value(cards):
     best_cards = best_card_ranking_generalized(cards, 2, 2, 1)
     if None in best_cards:
         return RankObject()
-    return RankObject("two_pair", best_cards[0], best_cards[1], best_cards[2])
+    else:
+        return RankObject("two_pair", best_cards[0], best_cards[1], best_cards[2])
 
 
 def pair_value(cards):
     best_cards = best_card_ranking_generalized(cards, 2, 1, 1, 1)
     if None in best_cards:
         return RankObject()
-    return RankObject("pair", best_cards[0], best_cards[1], best_cards[2], best_cards[3])
+    else:
+        return RankObject("pair", best_cards[0], best_cards[1], best_cards[2], best_cards[3])
 
 
 def high_card_value(cards):
     best_cards = best_card_ranking_generalized(cards, 1, 1, 1, 1, 1)
     if None in best_cards:
         return RankObject()
-    return RankObject("high_card", best_cards[0], best_cards[1], best_cards[2], best_cards[3], best_cards[4])
+    else:
+        return RankObject("high_card", best_cards[0], best_cards[1], best_cards[2], best_cards[3], best_cards[4])
 
 
 def get_hand_ranking(hand, board, verbose=False):
@@ -366,7 +372,3 @@ def get_probability_of_winning(hand, num_opponents, cards_on_board, num_games_si
     sd = (p * (1 - p) / iterations) ** 0.5
     print("99.7% confidence interval", [round(p - 3 * sd, 3), round(p + 3 * sd, 3)], "for", iterations, "iterations")
     return p
-
-# todo memoize probabilities for easy lookup
-# todo make sure cases like A spade K spade are treated the same as A heart K heart preflop
-# todo ie no redundant memoizations

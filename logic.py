@@ -1,5 +1,7 @@
 # Backend
+from classes import Hand, Card
 from gameplay_helpers import *
+from monte_carlo_helpers import get_probability_of_winning
 
 test_hand = Hand(Card("A", "spades"),
                  Card("K", "spades"))
@@ -18,6 +20,8 @@ print(
     get_probability_of_winning(hand=test_hand, num_opponents=5, cards_on_board=test_cards_on_board, verbose=False)
 )
 
+exit(0)
+
 ### ACTUAL GAME LOGIC ###
 num_games_to_play = 20 # todo change this if you want
 
@@ -28,7 +32,6 @@ while num_games_played < num_games_to_play:
 
     my_hand = get_my_hand()
     num_opponents = get_number_of_opponents()
-
 
     for betting_round in ["pre-flop", "flop", "turn", "river"]:
         wait_until_betting_round_is_loaded(betting_round)
@@ -41,6 +44,8 @@ while num_games_played < num_games_to_play:
         p_winning = get_probability_of_winning(hand=my_hand, num_opponents=num_opponents, cards_on_board=cards_on_board)
 
         wait_until_my_turn()
+
+        num_of_villains = get_num_of_opponents_still_in()
 
         pot_size = get_pot_size()
 
