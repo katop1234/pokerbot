@@ -49,9 +49,6 @@ def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.9):
 
     return best_x
 
-print(optimal_bet_proportion(0.3))
-exit()
-
 def get_pre_flop_odds_memoized():
     return read("serialized/pre_flop_odds")
 
@@ -116,7 +113,7 @@ def memoize_probabilities_preflop():
     for hand in all_hands:
         key = get_preflop_odds_key(hand, num_opponents=5, cards_on_board=[])
         if key not in pre_flop_odds_memoized:
-            p_winning = get_probability_of_winning(hand, 5, cards_on_board=[], num_games_simulated=100000)
+            p_winning = get_probability_of_winning(hand, 5, cards_on_board=[], num_games_simulated=1000)
             pre_flop_odds_memoized[key] = p_winning
             write_pre_flop_odds_memoized(pre_flop_odds_memoized)
             print("memoized", hand, "p winning", p_winning)
@@ -142,6 +139,7 @@ def get_hand_percentile(hand, num_opponents=5):
 
     return i / (len(ps_of_winning) - 1)
 
+write_pre_flop_odds_memoized({})
 memoize_probabilities_preflop()
 
 hand = Hand(Card("2", "clubs"), Card('3', "hearts"))
