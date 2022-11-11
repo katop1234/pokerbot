@@ -20,6 +20,14 @@ def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.75, edge
     therefore we will make money 90% or more of the time, and this will always be a positive EV bet for us.
     '''
 
+    # todo have to consider the case where we have a really high chance of winning (95%), and this code tells us to
+    #  raise by like 8 pots... then we also have the chance to lose a lot of money, even though we're expected to
+    #  make money 80% of the time (the weight of the 20% is not accounted for).
+    #  so should i add some code that basically also makes sure that the expected loss is never above a certain amount?
+    #  ie find a distribution of the outcomes, where x axis is the profit and y is probability, so find the area
+    #  for x < 0 (the expected loss) and make sure it's above a certain amount. So EVEN IF we lose, we only lose
+    #  by some salvageable amount. This will also help prevent us from overbetting and causing others to fold.
+
     if p_winning == 1:
         # avoid division by zero error
         p_winning = 0.99
@@ -33,7 +41,6 @@ def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.75, edge
         x = upper_bound_x - dx
 
         if x <= 0 or x > upper_bound_x:
-            # something's funky
             break
 
         gains_from_winning = 1
