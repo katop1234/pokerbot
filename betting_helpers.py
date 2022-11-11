@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 #  if i can't code it up rn, at least leave space to add it in later!!!
 
 # todo this function sucks
-def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.9):
+def optimal_bet_proportion(p_winning, num_villains, min_probability_of_making_money=0.9):
     '''
       returns the optimal betting size x subject to the probability of making money being
       above a certain threshold
@@ -21,40 +21,56 @@ def optimal_bet_proportion(p_winning, min_probability_of_making_money=0.9):
         # helps us model it as a binary indicator (win or lose) and the calculation
         # for standard deviation checks out and is much simpler.
       '''
+    num_players = num_villains + 1
+    if p_winning <= 1 / num_players:
+        # If there are 4 players who we have to play against and we have
+        # a less than 0.25 chance of winning, we shouldn't play at all
+        # note this isn't the TOTAL number of players, just those who
+        # haven't folded yet since now the probability of winning is
+        # evenly split amongst those guys
+        # JK Idk if this is good
+        return 0
+
+    edge_demanded = 0.05  # TODO can be changed later
 
     best_x = 0
-    curr_best_EV = -float("inf")
     p_losing = 1 - p_winning
-    breakeven_x = p_winning / (1 - 2 * p_winning) # derived from x / (1 + 2x) = p_win
-    # assuming one person calls, we have a pot size of 1+2x
-    # and we put in x into the pot
+    best_EV = -float("inf")
 
-    print("upper limit on x", breakeven_x)
+    upper_bound_on_x = p_winning / p_losing  # break even point, never bet more than this
+    upper_bound_on_x = upper_bound_on_x - edge_demanded
+
+    print("breakeven x", upper_bound_on_x)
 
     for i in range(101):
-        x = 0.01 * i
-        if x > breakeven_x:
+        dx = 0.01 * i
+        x = upper_bound_on_x - dx
+        if x > upper_bound_on_x or x <= 0:
+            best_x = x
             break
 
-        win_money = 1 + x # assume one more person calls
-        lose_money = -x
+        gains_from_winning = 1 + num_villains * x
+        losses_from_losing = -x
 
-        EV = p_winning * win_money + p_losing * lose_money
+        EV = p_winning * gains_from_winning + p_losing * losses_from_losing
 
-        var = ((p_winning * win_money - EV) ** 2 + (p_losing * lose_money - EV) ** 2) / 2
+        var = ((p_winning * gains_from_winning - EV) ** 2 + (p_losing * losses_from_losing - EV) ** 2) / 2
         std = var ** 0.5
 
         p_making_money = st.norm.cdf(EV / std)
 
         if p_making_money > min_probability_of_making_money:
-            if EV > curr_best_EV:
-                curr_best_EV = EV
+            if EV > best_EV:
+                best_EV = EV
                 best_x = x
 
         print("betsize", x, "Ev", round(EV, 3), "P+", round(p_making_money, 4))
 
     return max(best_x, 0)
 
+
+print(optimal_bet_proportion(0.3, 4))
+exit()
 
 def get_pre_flop_probabilities_dict_memoized():
     return read("serialized/pre_flop_odds")
